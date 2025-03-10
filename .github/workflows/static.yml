@@ -1,98 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sensor Data from ThingSpeak</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    #sensor-data {
-      font-size: 2rem;
-      margin-top: 50px;
-    }
-    #sensor-table {
-      margin-top: 20px;
-      width: 80%;
-      margin-left: auto;
-      margin-right: auto;
-      border-collapse: collapse;
-    }
-    #sensor-table th, #sensor-table td {
-      padding: 8px;
-      border: 1px solid #ddd;
-      text-align: center;
-    }
-    #sensor-table th {
-      background-color: #f2f2f2;
-    }
-  </style>
-</head>
-<body>
-  <h1>Sensor Data from ThingSpeak</h1>
+name: Deploy to GitHub Pages
 
-  <!-- Displaying Sensor Data -->
-  <div id="sensor-data">Loading...</div>
+on:
+  push:
+    branches:
+      - main  # This will trigger the deployment on any push to the 'main' branch
 
-  <!-- Optional: Show multiple data points in a table -->
-  <table id="sensor-table">
-    <thead>
-      <tr>
-        <th>Field 1 (Sensor Data)</th>
-        <th>Field 2 (Sensor Data)</th>
-      </tr>
-    </thead>
-    <tbody id="sensor-table-body">
-      <!-- Sensor data rows will appear here -->
-    </tbody>
-  </table>
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-  <script>
-    // API URL for your ThingSpeak channel
-    const apiURL = 'https://api.thingspeak.com/channels/2833583/feeds.json?results=2';
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2  # This checks out your repository's code
 
-    // Fetch the data from ThingSpeak
-    fetch(apiURL)
-      .then(response => response.json())
-      .then(data => {
-        // If we get the data, process and display it
-        const feeds = data.feeds;
-        
-        // Show the latest data in the 'sensor-data' div
-        const latestFeed = feeds[0];
-        document.getElementById('sensor-data').innerHTML = `Field 1: ${latestFeed.field1} | Field 2: ${latestFeed.field2}`;
+    - name: Set up Node.js (optional)
+      uses: actions/setup-node@v2  # This is only needed if you're using a JS build tool or framework
 
-        // Display the last 2 data entries in the table
-        const tableBody = document.getElementById('sensor-table-body');
-        tableBody.innerHTML = ''; // Clear existing table data
-        
-        feeds.forEach(feed => {
-          const row = document.createElement('tr');
-          const field1Cell = document.createElement('td');
-          const field2Cell = document.createElement('td');
-          
-          field1Cell.textContent = feed.field1 || 'No Data';
-          field2Cell.textContent = feed.field2 || 'No Data';
-          
-          row.appendChild(field1Cell);
-          row.appendChild(field2Cell);
-          tableBody.appendChild(row);
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching data from ThingSpeak:', error);
-        document.getElementById('sensor-data').innerHTML = 'Error fetching data';
-      });
-  </script>
-</body>
-</html>
-
-
-          path: '.'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4  # A pre-made action to deploy to GitHub Pages
+      with:
+        branch: gh-pages   # The branch to deploy to (GitHub Pages typically uses 'gh-pages')
+        folder: .  # The folder to deploy, '.' for the entire project
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided by GitHub Actions
